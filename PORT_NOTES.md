@@ -64,8 +64,9 @@ with an installed original FlashNX:
   `parse_version` keeps only the numeric triple (a `2.1.0-x` suffix parses
   as 2.1.0 and would never read as newer than the running build).
 - **Attribution kept**: About by-line "Jonathan8520 · FlashNX2 port by
-  Lucaspec72 (AI)", footer band "Jonathan8520 · FlashNX2 · v2.2.0", About
+  Lucaspec72", footer band "Jonathan8520 · FlashNX2 · v2.2.0", About
   source row → github.com/Lucaspec72/FlashNX2, bug link → .../FlashNX2/issues.
+  Homebrew-menu author (NACP `APP_AUTHOR`) = "Lucaspec72".
 
 ## Build status log
 

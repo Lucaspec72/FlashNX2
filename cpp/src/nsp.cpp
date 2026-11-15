@@ -1188,7 +1188,7 @@ extern "C" int nsp_tile_exists(u64 program_id) {
 /// made with Sphaira or another tool starts FlashNX with the full memory as
 /// well as our own tile does, but it has its own program ID (derived from its
 /// launch arguments), so `nsp_tile_exists` cannot see it. Its name is the one
-/// thing it shares: Sphaira copies the `.nro`'s NACP, "FlashNX2" by "Lucas"
+/// thing it shares: Sphaira copies the `.nro`'s NACP, "FlashNX2" by "Lucaspec72"
 /// (forked from "FlashNX" by "Jonathan8520").
 ///
 /// Read through `ns` and not the card: an installed title leaves nothing

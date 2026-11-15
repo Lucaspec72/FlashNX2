@@ -41,6 +41,12 @@ REPLACES = [
     ("rust/src", ".rs",
      "https://api.github.com/repos/Jonathan8520/FlashNX/releases/latest",
      "https://api.github.com/repos/Lucaspec72/FlashNX2/releases/latest"),
+    # Homebrew-menu author (NACP; expanded into unquoted -D defines, so no
+    # spaces/parens). Original-dev attribution elsewhere is untouched.
+    ("cpp", "Makefile", "APP_AUTHOR  := Lucas\n", "APP_AUTHOR  := Lucaspec72\n"),
+    # About by-line (keeps Jonathan8520; drops the "(AI)" tag)
+    ("rust/src/library", ".rs",
+     "FlashNX2 port by Lucaspec72 (AI)", "FlashNX2 port by Lucaspec72"),
 ]
 
 changed = {}
@@ -54,6 +60,10 @@ for sub, ext, old, new in REPLACES:
             continue
         for fn in sorted(files):
             if ext and not fn.endswith(ext):
+                continue
+            # Never rewrite this script itself: its own `old` literals must
+            # survive a run for the next run to be able to retarget again.
+            if os.path.abspath(os.path.join(dirpath, fn)) == os.path.abspath(__file__):
                 continue
             p = os.path.join(dirpath, fn)
             with open(p, encoding="utf-8") as f:

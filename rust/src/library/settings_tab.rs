@@ -1511,7 +1511,7 @@ fn about_pane(
     // The author's name is the licence's attribution: written as it is, in
     // every language, like the credit in the footer band. FlashNX2 keeps it
     // (MIT requires it) and adds its own port credit beside it.
-    let by = u.about_by.replacen("{}", "Jonathan8520 \u{00B7} FlashNX2 port by Lucaspec72 (AI)", 1);
+    let by = u.about_by.replacen("{}", "Jonathan8520 \u{00B7} FlashNX2 port by Lucaspec72", 1);
     let y = b.settings_about_header(top + 4.0, logo, &version, &by);
     // The update row: what the check found, and A to act on it.
     let installed = crate::updater::installed();

@@ -36,7 +36,7 @@ INCLUDES    := include third_party/libdrm_nouveau third_party/sqlite third_party
 # below) - no parentheses AND no spaces allowed (each would break /bin/sh
 # tokenization: parens = syntax error, spaces = stray "input files").
 APP_TITLE   := FlashNX2
-APP_AUTHOR  := Lucas
+APP_AUTHOR  := Lucaspec72
 APP_VERSION := 2.2.0
 # Icon shown in hbmenu / Sphaira / forwarders. Lives in the repo root's
 # `assets/` folder so it sits next to README + the banner. devkitPro's
