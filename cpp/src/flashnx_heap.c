@@ -60,6 +60,15 @@ static void init_locked(void) {
     if (s_ready) {
         return;
     }
+    // Switch 2 (FlashNX2): the heap is mimalloc-managed and newlib's
+    // sbrk/fake_heap_* may not describe it (see libounce notes). If the
+    // extents are missing, stay inert — everything just uses the console's
+    // allocator as-is.
+    if (fake_heap_start == NULL || fake_heap_end == NULL
+            || fake_heap_end <= fake_heap_start) {
+        s_ready = 1;
+        return;
+    }
     uintptr_t start = ((uintptr_t)fake_heap_start + BH_UNIT - 1) & ~(BH_UNIT - 1);
     uintptr_t end = (uintptr_t)fake_heap_end & ~(BH_UNIT - 1);
     if (end <= start) {

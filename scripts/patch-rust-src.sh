@@ -18,11 +18,13 @@
 #
 set -uo pipefail
 
-TC="nightly-x86_64-pc-windows-gnu"
+TC="${RUST_TC:-nightly}"
+# FlashNX2: builds run in the Linux build container (plain `nightly`). Override
+# with RUST_TC to target another toolchain. FlashNX upstream:
+#   TC="nightly-x86_64-pc-windows-gnu"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
-# 1. Make sure the toolchain + rust-src are installed (a bare `nightly` grabs the
-#    MSVC host, which needs VS Build Tools — pin the GNU host explicitly).
+# 1. Make sure the toolchain + rust-src are installed.
 if ! rustup toolchain list 2>/dev/null | grep -q "^$TC"; then
     echo "==> Installing $TC (+ rust-src)..."
     rustup toolchain install "$TC" --component rust-src || exit 1

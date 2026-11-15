@@ -1,7 +1,8 @@
 [toolchain]
-# Use the GNU (MinGW) host on Windows so cargo's host-side build scripts don't
-# need MSVC's link.exe (which would require Visual Studio Build Tools).
-channel = "nightly-x86_64-pc-windows-gnu"
+# FlashNX2 (Switch 2 port): the Rust staticlib is built inside the Linux build
+# container (derived devkitpro/devkita64 image), so the channel is the plain
+# host-agnostic `nightly` — rustup resolves the platform triple. FlashNX
+# upstream pinned nightly-x86_64-pc-windows-gnu to dodge MSVC on Windows.
 components = ["rust-src"]
 # No `targets` field on purpose: `aarch64-nintendo-switch-freestanding` is
 # tier-3, so rust-std is not pre-built. We build core/alloc/compiler_builtins

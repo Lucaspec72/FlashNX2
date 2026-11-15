@@ -1242,8 +1242,11 @@ extern "C" u64 nsp_find_app_named(const char* name) {
                 continue;
             }
             for (int l = 0; l < 16; l++) {
-                const char* n = ctl->nacp.lang[l].name;
-                if (n[0] && strncasecmp(n, name, sizeof(ctl->nacp.lang[l].name)) == 0) {
+                // FlashNX2: libounce moved the language entries into
+                // NacpStruct.lang_data (new compressed TitlesDataFormat union);
+                // the raw entries are the union's lang[16] member as before.
+                const char* n = ctl->nacp.lang_data.lang[l].name;
+                if (n[0] && strncasecmp(n, name, sizeof(ctl->nacp.lang_data.lang[l].name)) == 0) {
                     found = id;
                     break;
                 }

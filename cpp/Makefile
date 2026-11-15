@@ -9,10 +9,13 @@ $(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/de
 endif
 
 TOPDIR ?= $(CURDIR)
-include $(DEVKITPRO)/libnx/switch_rules
+# FlashNX2 (Switch 2 port): libounce replaces libnx; switch2_rules routes -lnx
+# to libounce, puts the switch2 portlibs (OunceVK GL stack) first and defines
+# SWITCH2_CPU. See ../../PORT_NOTES.md.
+include $(DEVKITPRO)/libounce/switch2_rules
 
 #---------------------------------------------------------------------------------
-TARGET      := FlashNX
+TARGET      := FlashNX2
 BUILD       := build
 # third_party/libdrm_nouveau: our copy of devkitPro's libdrm_nouveau (MIT), the
 # layer between Mesa and the GPU driver, built in place of -ldrm_nouveau so it
@@ -27,13 +30,14 @@ BUILD       := build
 SOURCES     := src third_party/libdrm_nouveau third_party/gme third_party/gme/ext
 INCLUDES    := include third_party/libdrm_nouveau third_party/sqlite third_party/gme
 
-# User-facing name = "FlashNX" (rebrand 2026-05-26, fully applied at v1.0.0).
-# The repo + Cargo lib name stay `flash-for-switch` (dev-facing, stable); every
-# user-facing artifact is FlashNX — the `.nro`/.nacp name (TARGET), the .nacp
-# title/author below, and the SD data dir `switch/FlashNX/`.
-APP_TITLE   := FlashNX
-APP_AUTHOR  := Jonathan8520
-APP_VERSION := 2.1.0
+# User-facing name = "FlashNX2" (Switch 2 fork of FlashNX; engine internals
+# keep the flash-for-switch / ruffle_switch names so only identity bits change).
+# NOTE: these are expanded into unquoted -D compile defines (see DEFINES
+# below) - no parentheses AND no spaces allowed (each would break /bin/sh
+# tokenization: parens = syntax error, spaces = stray "input files").
+APP_TITLE   := FlashNX2
+APP_AUTHOR  := Lucas
+APP_VERSION := 2.1.0-ns2.0
 # Icon shown in hbmenu / Sphaira / forwarders. Lives in the repo root's
 # `assets/` folder so it sits next to README + the banner. devkitPro's
 # %.nro rule reads $(NROFLAGS) which we wire below — without --icon= the
@@ -57,7 +61,9 @@ ROMFS     := romfs
 endif
 
 #---------------------------------------------------------------------------------
-ARCH     := -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
+# Switch 2: read the CPU flags from libounce's switch2_cpu.mk (cortex-a78c),
+# exposed as SWITCH2_CPU by switch2_rules. Do not hardcode.
+ARCH     := $(SWITCH2_CPU) -mtp=soft -fPIE
 
 # The version reaches C++ too: a shortcut writes it into its NACP, so a tile
 # that stops working says which FlashNX produced it. One source of truth.
@@ -79,7 +85,7 @@ CXXFLAGS := $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++17
 CFLAGS   += -DNDEBUG
 
 ASFLAGS  := -g $(ARCH)
-LDFLAGS  := -specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
+LDFLAGS  := -specs=$(DEVKITPRO)/libounce/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 # Big page-aligned blocks at the top of the heap, newlib below (src/flashnx_heap.c).
 # Wrapping these entry points catches the public names too: newlib's memalign,
 # aligned_alloc, posix_memalign, free, realloc and mallinfo all call them.
@@ -87,8 +93,12 @@ LDFLAGS  += -Wl,--wrap=_sbrk_r,--wrap=_memalign_r,--wrap=_free_r,--wrap=_realloc
 LDFLAGS  += -Wl,--wrap=_malloc_usable_size_r,--wrap=_mallinfo_r
 
 #---------------------------------------------------------------------------------
-# Rust staticlib + switch-mesa GL stack + libnx
+# Rust staticlib + OunceVK GL stack (switch2 portlibs) + libounce
 #---------------------------------------------------------------------------------
+# Switch 2 note: -lEGL is now the switch2 stub (-> OunceVK GL / Zink on NVK).
+# -lglapi and -lGLESv2 resolve to the switch2 portlibs' EMPTY shadow archives,
+# kept on the link line so this Makefile needs no other change. -lglapi must
+# stay before -lGLESv2 as upstream did.
 # RUST_PROFILE picks which Cargo profile dir to link against. Default
 # `release` matches `cargo build --release`. Override to `release-dev` for
 # the LTO=thin fast-iteration dev profile (see scripts/build.sh --dev).
