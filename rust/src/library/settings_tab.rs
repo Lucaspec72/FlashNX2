@@ -1485,7 +1485,7 @@ fn help_pane(
     let (c, y, _) = b.settings_block(y + 18.0, &idea, focus.filter(|r| *r == idea_row).map(|_| 0), glide);
     cells.extend(c);
     let y = b.settings_note(y + 8.0, u.help_suggest, 3);
-    b.settings_note_icon(y + 16.0, Icon::Link, "github.com/Jonathan8520/FlashNX/issues", ui_col::TEXT2);
+    b.settings_note_icon(y + 16.0, Icon::Link, "github.com/Lucaspec72/FlashNX2/issues", ui_col::TEXT2);
     *hints = match focus {
         Some(r) if r == bug_row && empty => std::vec![(&[Btn::B][..], u.back)],
         Some(r) if r == bug_row => std::vec![(&[Btn::A][..], u.open), (&[Btn::B][..], u.back)],
@@ -1509,8 +1509,9 @@ fn about_pane(
     let top = b.settings_title(u.sec_about, None);
     let version = u.about_version.replacen("{}", crate::bugreport::APP_VERSION, 1);
     // The author's name is the licence's attribution: written as it is, in
-    // every language, like the credit in the footer band.
-    let by = u.about_by.replacen("{}", "Jonathan8520", 1);
+    // every language, like the credit in the footer band. FlashNX2 keeps it
+    // (MIT requires it) and adds its own port credit beside it.
+    let by = u.about_by.replacen("{}", "Jonathan8520 \u{00B7} FlashNX2 port by Lucaspec72 (AI)", 1);
     let y = b.settings_about_header(top + 4.0, logo, &version, &by);
     // The update row: what the check found, and A to act on it.
     let installed = crate::updater::installed();
@@ -1542,7 +1543,9 @@ fn about_pane(
     };
     let fp_logo = b.fp_logo();
     let rows = [
-        Row::new(Icon::Code, u.about_source).value("github.com/Jonathan8520/FlashNX"),
+        // FlashNX2's own repo; the original FlashNX is credited in the
+        // by-line above and in the footer band.
+        Row::new(Icon::Code, u.about_source).value("github.com/Lucaspec72/FlashNX2"),
         Row::new(Icon::Play, u.about_engine).value("Ruffle"),
         // Where the importer's games and covers come from: two volunteer
         // archives, credited by name like the engine and the icons.

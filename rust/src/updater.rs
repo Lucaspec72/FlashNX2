@@ -6,7 +6,7 @@
 //! stays a dot on the Settings tab and a row in À propos. Nothing is
 //! downloaded or replaced before the player says so with A.
 //!
-//! Installing downloads `FlashNX.nro` beside the running one, checks it against
+//! Installing downloads `FlashNX2.nro` beside the running one, checks it against
 //! the SHA-256 GitHub gives for it, and only then puts it in place, keeping the
 //! old file aside until the new one has its name (cpp/src/updater.cpp). The
 //! update is used from the next start, which the player can ask for at once.
@@ -15,14 +15,14 @@ use core::ffi::{c_char, c_int};
 
 /// GitHub's answer for the newest release that is neither a draft nor a
 /// pre-release.
-const LATEST_URL: &str = "https://api.github.com/repos/Jonathan8520/FlashNX/releases/latest";
+const LATEST_URL: &str = "https://api.github.com/repos/Lucaspec72/FlashNX2/releases/latest";
 /// The release file that is FlashNX itself.
-const ASSET: &str = "FlashNX.nro";
+const ASSET: &str = "FlashNX2.nro";
 /// The last version a window was shown for, so it is offered once.
-const ANNOUNCED_PATH: &str = "sdmc:/switch/FlashNX/update_seen.txt";
+const ANNOUNCED_PATH: &str = "sdmc:/switch/FlashNX2/update_seen.txt";
 /// Debug marker: when present, the running version reads as 0.0.0, so the
 /// current release is offered and can be installed over a test build.
-const TEST_MARKER: &str = "sdmc:/switch/FlashNX/update_test.on";
+const TEST_MARKER: &str = "sdmc:/switch/FlashNX2/update_test.on";
 /// Kept free on top of the new file (net.cpp `SPACE_MARGIN`).
 const SPACE_MARGIN: u64 = 8 * 1024 * 1024;
 /// A check that got no answer is asked again this much later, once.
@@ -173,7 +173,7 @@ fn hex32(s: &str) -> Option<[u8; 32]> {
 }
 
 /// The release GitHub answered with, when it is newer than the one running
-/// and carries a FlashNX.nro with its SHA-256.
+/// and carries a FlashNX2.nro with its SHA-256.
 fn parse_release(buf: &[u8]) -> Result<Option<Release>, ()> {
     let v: serde_json::Value = serde_json::from_slice(buf).map_err(|_| ())?;
     if v["draft"].as_bool() == Some(true) || v["prerelease"].as_bool() == Some(true) {

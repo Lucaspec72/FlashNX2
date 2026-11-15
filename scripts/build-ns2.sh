@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# FlashNX2 (Switch 2 port) build orchestrator — runs INSIDE the build container
-# (image ns2-rust-builder, see ../docker/Dockerfile), from /work/FlashNX2/FlashNX.
+# FlashNX2 (Switch 2 port) build orchestrator - runs INSIDE the build container
+# (image ns2-rust-builder, see ./docker/Dockerfile), from the repo root
+# (mounted at /project by flashnx2.ps1; devkit drop mounted at
+# $SWITCH2_DEVKIT, default /devkit).
 #
 # FlashNX upstream's scripts/build.sh targets Windows (cargo on the host, make
 # in devkitPro's MSYS2 bash). On Switch 2 everything runs in the Linux
@@ -20,15 +22,25 @@ if [[ "${1:-}" == "dev" ]]; then
     CARGO_FLAG="--profile release-dev --features instr"
 fi
 
-# switch2vars.sh (workspace-level devkit drop) sets DEVKITPRO/DEVKITA64 and the
-# switch2 portlib paths. Same file dev.ps1 sources.
-source /work/ounce-devkit-20261114/switch2vars.sh
+# switch2vars.sh (in the devkit drop, mounted read-only) sets DEVKITPRO/
+# DEVKITA64 and the switch2 portlib paths.
+source "${SWITCH2_DEVKIT:-/devkit}/switch2vars.sh"
 
-# Persist the crates.io download cache in the workspace: the container is
-# --rm, so CARGO_HOME=/opt/cargo (image default) would re-download every crate
-# on every build. rustup stays in the image; only cargo's cache moves.
-export CARGO_HOME=/work/FlashNX2/.cargo-home
+# Persist the crates.io download cache inside the repo: the container is
+# --rm, so CARGO_HOME=/opt/cargo (image default) would re-download every
+# crate on every build. rustup stays in the image; only cargo's cache moves.
+# (git-ignored; if deleted, the next build just re-downloads - slower.)
+export CARGO_HOME="$ROOT/.cargo-home"
 mkdir -p "$CARGO_HOME"
+
+# Fresh clones: rust/Cargo.lock is git-ignored upstream, so the first resolve
+# pulls the newest libc - and libc 0.2.190+ breaks aarch64+horizon (see
+# PORT_NOTES.md). Pin the app graph to the last good libc. Idempotent.
+if ! grep -A1 -x 'name = "libc"' "$ROOT/rust/Cargo.lock" 2>/dev/null \
+        | grep -q 'version = "0.2.189"'; then
+    echo "Pinning libc 0.2.189 in the app graph (0.2.190+ breaks aarch64+horizon)..."
+    (cd "$ROOT/rust" && cargo update libc --precise 0.2.189)
+fi
 
 # build-std resolves std's dependencies freshly against crates.io (it ignores
 # BOTH the rust-src library/Cargo.lock and this workspace's Cargo.lock), so

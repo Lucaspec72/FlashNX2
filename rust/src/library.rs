@@ -1279,10 +1279,10 @@ const USER_SD_ROOTS: &[&str] = &["sdmc:/flashnx", "sdmc:/ruffle"];
 ///
 /// A lone file in an otherwise empty `sdmc:/flashnx/` reads as leftovers, and
 /// deleting leftovers is exactly what a tidy person does; the app would then
-/// forget where its library went. `sdmc:/switch/FlashNX/` is the homebrew's own
+/// forget where its library went. `sdmc:/switch/FlashNX2/` is the homebrew's own
 /// folder, next to the `.nro` and the diagnostic markers, and nobody empties
 /// that. It is also the one path that can never itself be moved.
-const GAMES_DIR_FILE: &str = "sdmc:/switch/FlashNX/games_dir";
+const GAMES_DIR_FILE: &str = "sdmc:/switch/FlashNX2/games_dir";
 
 /// Where the pointer used to live. Read-only, and migrated on the first
 /// write: an install that already chose a folder must not lose it just
@@ -1354,7 +1354,7 @@ pub(crate) fn set_primary_root(path: &str) {
         let _ = std::fs::remove_file(GAMES_DIR_FILE);
         return;
     }
-    let _ = std::fs::create_dir_all("sdmc:/switch/FlashNX");
+    let _ = std::fs::create_dir_all("sdmc:/switch/FlashNX2");
     let _ = std::fs::write(GAMES_DIR_FILE, trimmed.as_bytes());
 }
 
@@ -2115,7 +2115,7 @@ static LIBRARY: Mutex<State> = Mutex::new(State {
 /// strings, max `HISTORY_MAX` entries (LRU-style — newest at end, oldest
 /// dropped when we exceed). Lives in the same dir as `cacert.pem` so the user's
 /// `sdmc:/ruffle/` stays SWF-only.
-const HISTORY_PATH: &str = "sdmc:/switch/FlashNX/distant_history.json";
+const HISTORY_PATH: &str = "sdmc:/switch/FlashNX2/distant_history.json";
 /// Runaway guard, NOT a budget. It used to be 20 and silently deleted the
 /// oldest URL every time you imported past it. The IMPORTER home now has search
 /// (Minus), sort (Y) and a scrolling window, so a long history costs nothing to
@@ -2127,7 +2127,7 @@ const HISTORY_MAX: usize = 500;
 /// re-fetching); the epoch is when the URL was first saved. Kept OUT of
 /// `distant_history.json` so that file stays the plain URL list it has always
 /// been. A missing/corrupt file just means "unknown", never an error.
-const HISTORY_META_PATH: &str = "sdmc:/switch/FlashNX/distant_history_meta.json";
+const HISTORY_META_PATH: &str = "sdmc:/switch/FlashNX2/distant_history_meta.json";
 
 /// Rows of covers visible at once in the JOUER grid. `draw_library_gallery`
 /// lays its rows out from this.
@@ -5609,7 +5609,7 @@ static MOVE_JOB: Mutex<Option<MoveJob>> = Mutex::new(None);
 /// (moved last) apart from their games, and the HOME icons of what had moved
 /// pointing at the old place (Jonathan, 2026-10-14: "imagine on ferme en plein
 /// milieu"). Outside both folders, beside `games_dir`.
-const MOVE_JOURNAL: &str = "sdmc:/switch/FlashNX/library_move.json";
+const MOVE_JOURNAL: &str = "sdmc:/switch/FlashNX2/library_move.json";
 
 #[derive(serde::Serialize, serde::Deserialize)]
 struct MoveJournal {
@@ -5630,7 +5630,7 @@ fn write_move_journal(job: &MoveJob) {
         skipped: job.skipped.clone(),
     };
     if let Ok(text) = serde_json::to_string(&journal) {
-        let _ = std::fs::create_dir_all("sdmc:/switch/FlashNX");
+        let _ = std::fs::create_dir_all("sdmc:/switch/FlashNX2");
         if std::fs::write(MOVE_JOURNAL, text).is_err() {
             log("games dir: could not write the move's journal\n");
         }
@@ -10193,7 +10193,7 @@ fn tile_id_for(swf_path: &str) -> Option<u64> {
 }
 
 /// The `.nro` every tile starts (`DEFAULT_NRO` in forwarder/source/main.c).
-const SELF_NRO: &str = "sdmc:/switch/FlashNX/FlashNX.nro";
+const SELF_NRO: &str = "sdmc:/switch/FlashNX2/FlashNX2.nro";
 
 /// FlashNX's own HOME Menu tile: a tile like a game's, derived from the path of
 /// the `.nro` instead of a `.swf`, and with no `tiles/<ID>.cfg`. The forwarder
@@ -10279,7 +10279,7 @@ fn install_self_tile(s: &mut State) {
 }
 
 /// Where a failed install leaves its reason, for reading back over FTP.
-const TILE_ERROR_PATH: &str = "sdmc:/switch/FlashNX/tile_error.txt";
+const TILE_ERROR_PATH: &str = "sdmc:/switch/FlashNX2/tile_error.txt";
 
 /// Where a tile records which game it launches.
 ///
@@ -10292,10 +10292,10 @@ fn tile_cfg_path(program_id: u64) -> std::string::String {
 }
 
 /// The folder of the tiles' configs, one `<program ID>.cfg` per tile.
-const TILES_DIR: &str = "sdmc:/switch/FlashNX/tiles";
+const TILES_DIR: &str = "sdmc:/switch/FlashNX2/tiles";
 
 /// The tiles' configs: (program ID, the game's path), read from
-/// `sdmc:/switch/FlashNX/tiles/` once and kept until a config is written.
+/// `sdmc:/switch/FlashNX2/tiles/` once and kept until a config is written.
 static TILE_INDEX: Mutex<Option<std::vec::Vec<(u64, std::string::String)>>> = Mutex::new(None);
 
 /// Listed by C++ and read with `read_sd_text`, never with `std::fs`: Rust's

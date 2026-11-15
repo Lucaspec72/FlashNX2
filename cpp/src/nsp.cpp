@@ -978,7 +978,7 @@ extern "C" int nsp_install_tile(u64 program_id, const char* title, const char* s
     if (!build_tile(tile, program_id, title, swf_path, icon, icon_len, err, err_cap)) return 0;
 
     // Debug marker, the same shape as `noalloc.on` and `trace.on`: when
-    // `sdmc:/switch/FlashNX/nsp_dump.on` is present, the tile is ALSO written out
+    // `sdmc:/switch/FlashNX2/nsp_dump.on` is present, the tile is ALSO written out
     // as an installable `.nsp` before anything touches the console's own storage.
     //
     // Before, deliberately. That file is what gets handed to `hactool` when a
@@ -986,10 +986,10 @@ extern "C" int nsp_install_tile(u64 program_id, const char* title, const char* s
     // even when the install that follows is what goes wrong.
     {
         struct stat st;
-        if (::stat("sdmc:/switch/FlashNX/nsp_dump.on", &st) == 0) {
+        if (::stat("sdmc:/switch/FlashNX2/nsp_dump.on", &st) == 0) {
             char path[128];
             std::snprintf(path, sizeof(path),
-                          "sdmc:/switch/FlashNX/tiles/%016lX.nsp", program_id);
+                          "sdmc:/switch/FlashNX2/tiles/%016lX.nsp", program_id);
             char dump_err[96] = {};
             const int ok = nsp_write_file(program_id, title, swf_path, icon, icon_len, path,
                                           dump_err, sizeof(dump_err));
@@ -1188,7 +1188,8 @@ extern "C" int nsp_tile_exists(u64 program_id) {
 /// made with Sphaira or another tool starts FlashNX with the full memory as
 /// well as our own tile does, but it has its own program ID (derived from its
 /// launch arguments), so `nsp_tile_exists` cannot see it. Its name is the one
-/// thing it shares: Sphaira copies the `.nro`'s NACP, "FlashNX" by "Jonathan8520".
+/// thing it shares: Sphaira copies the `.nro`'s NACP, "FlashNX2" by "Lucas"
+/// (forked from "FlashNX" by "Jonathan8520").
 ///
 /// Read through `ns` and not the card: an installed title leaves nothing
 /// readable on the SD (its content is encrypted under `Nintendo/`).

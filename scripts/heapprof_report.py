@@ -3,7 +3,7 @@
     python scripts/heapprof_report.py heapprof.bin cpp/FlashNX.elf [--top 40]
     python scripts/heapprof_report.py heapprof.bin cpp/FlashNX.elf --focus REGEX
 
-heapprof.bin comes from `sdmc:/switch/FlashNX/heapprof.bin`, written every 1200
+heapprof.bin comes from `sdmc:/switch/FlashNX2/heapprof.bin`, written every 1200
 frames by the `--memprof` build (rust/src/heapprof.rs). The ELF must be the one
 of the build that ran. Each record is a call stack with the live bytes sampled
 under it; a sample stands for max(its size, the sampling interval) bytes, so

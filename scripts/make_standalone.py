@@ -1096,7 +1096,7 @@ def make_standalone(nro, swf, out_path, name=None, author=None, version=None,
     return entries
 
 
-RELEASES_API = 'https://api.github.com/repos/Jonathan8520/FlashNX/releases/latest'
+RELEASES_API = 'https://api.github.com/repos/Lucaspec72/FlashNX2/releases/latest'
 
 
 def download_dir():
@@ -1121,12 +1121,12 @@ def download_flashnx(dest_dir, progress=None):
             release = json.load(r)
     except Exception as e:
         raise StandaloneError('Could not ask GitHub for the latest FlashNX: %s' % e)
-    asset = next((a for a in release.get('assets', []) if a.get('name') == 'FlashNX.nro'), None)
+    asset = next((a for a in release.get('assets', []) if a.get('name') == 'FlashNX2.nro'), None)
     if asset is None:
-        raise StandaloneError('The latest FlashNX release has no FlashNX.nro.')
+        raise StandaloneError('The latest FlashNX2 release has no FlashNX2.nro.')
     version = (release.get('tag_name') or '').lstrip('v') or '?'
     total = asset.get('size') or 0
-    path = os.path.join(dest_dir, 'FlashNX.nro')
+    path = os.path.join(dest_dir, 'FlashNX2.nro')
     part = path + '.part'
     try:
         req = urllib.request.Request(asset['browser_download_url'], headers=agent)

@@ -210,7 +210,7 @@ static const char* chosen_games_dir(void) {
     // nothing beside walking the card, and it cannot go stale.
     static char buf[512];
     buf[0] = '\0';
-    FILE* f = std::fopen("sdmc:/switch/FlashNX/games_dir", "rb");
+    FILE* f = std::fopen("sdmc:/switch/FlashNX2/games_dir", "rb");
     // Installs that chose a folder before the pointer moved still have it in
     // the old spot; Rust migrates it on the next write.
     if (!f) f = std::fopen("sdmc:/flashnx/games_dir", "rb");
@@ -299,8 +299,8 @@ static int remove_dir_recursive(const char* path) {
 // is left is emptied at the next launch. It never deletes anything outside
 // this folder.
 namespace {
-constexpr const char* TRASH_PARENT = "sdmc:/switch/FlashNX";
-constexpr const char* TRASH_DIR = "sdmc:/switch/FlashNX/.trash";
+constexpr const char* TRASH_PARENT = "sdmc:/switch/FlashNX2";
+constexpr const char* TRASH_DIR = "sdmc:/switch/FlashNX2/.trash";
 Thread  g_trash_thread;
 Mutex   g_trash_mutex;
 CondVar g_trash_wake;

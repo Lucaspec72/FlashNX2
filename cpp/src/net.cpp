@@ -31,10 +31,10 @@
 // Free space on the SD card in bytes, or -1 when the card cannot say.
 //
 // Debug marker, the same shape as `noalloc.on`: a number in
-// `sdmc:/switch/FlashNX/fakefree.mb` is taken as the free space in MB, which is
+// `sdmc:/switch/FlashNX2/fakefree.mb` is taken as the free space in MB, which is
 // how "the card is full" gets tried on a card that is not.
 extern "C" long long flashnx_sd_free_bytes(void) {
-    if (FILE* f = std::fopen("sdmc:/switch/FlashNX/fakefree.mb", "rb")) {
+    if (FILE* f = std::fopen("sdmc:/switch/FlashNX2/fakefree.mb", "rb")) {
         char buf[32] = {};
         std::fread(buf, 1, sizeof(buf) - 1, f);
         std::fclose(f);
@@ -52,7 +52,7 @@ extern "C" long long flashnx_sd_free_bytes(void) {
 
 namespace {
 
-constexpr const char* CACERT_PATH = "sdmc:/switch/FlashNX/cacert.pem";
+constexpr const char* CACERT_PATH = "sdmc:/switch/FlashNX2/cacert.pem";
 
 bool g_curl_inited = false;
 
@@ -234,7 +234,7 @@ extern "C" void net_shutdown(void) {
 extern "C" int write_cacert_to_sd(const char* data, int len) {
     if (!data || len <= 0) return -1;
     ::mkdir("sdmc:/switch", 0755);
-    ::mkdir("sdmc:/switch/FlashNX", 0755);
+    ::mkdir("sdmc:/switch/FlashNX2", 0755);
     struct stat st;
     if (::stat(CACERT_PATH, &st) == 0 && (int)st.st_size == len) {
         std::printf("write_cacert_to_sd: present, %d bytes at %s (skip)\n",

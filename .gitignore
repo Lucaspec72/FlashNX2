@@ -2,6 +2,10 @@
 /rust/target/
 **/*.rs.bk
 Cargo.lock
+# FlashNX2: cargo download/registry cache persisted across container builds
+# (build-ns2.sh sets CARGO_HOME here). Contains a patched libc 0.2.190+ crate
+# - see PORT_NOTES.md. Never commit this.
+/.cargo-home/
 
 # C++ build
 /cpp/build/

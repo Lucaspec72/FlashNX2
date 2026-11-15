@@ -37,7 +37,7 @@ INCLUDES    := include third_party/libdrm_nouveau third_party/sqlite third_party
 # tokenization: parens = syntax error, spaces = stray "input files").
 APP_TITLE   := FlashNX2
 APP_AUTHOR  := Lucas
-APP_VERSION := 2.1.0-ns2.0
+APP_VERSION := 2.2.0
 # Icon shown in hbmenu / Sphaira / forwarders. Lives in the repo root's
 # `assets/` folder so it sits next to README + the banner. devkitPro's
 # %.nro rule reads $(NROFLAGS) which we wire below — without --icon= the

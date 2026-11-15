@@ -27,14 +27,14 @@
 
 // Where FlashNX itself lives. A tile is useless without it, which is the
 // intended coupling: updating FlashNX updates what every tile launches.
-#define DEFAULT_NRO "sdmc:/switch/FlashNX/FlashNX.nro"
+#define DEFAULT_NRO "sdmc:/switch/FlashNX2/FlashNX2.nro"
 
 // Where FlashNX was started from, when that is not DEFAULT_NRO: one line,
 // written by FlashNX itself (`remember_own_path` in cpp/src/main.cpp).
-#define NRO_NOTE "sdmc:/switch/FlashNX/tiles/nro.path"
+#define NRO_NOTE "sdmc:/switch/FlashNX2/tiles/nro.path"
 
-// `sdmc:/switch/FlashNX/tiles/<16 hex digits>.cfg`, written by the installer.
-#define TILE_CFG_FMT "sdmc:/switch/FlashNX/tiles/%016lX.cfg"
+// `sdmc:/switch/FlashNX2/tiles/<16 hex digits>.cfg`, written by the installer.
+#define TILE_CFG_FMT "sdmc:/switch/FlashNX2/tiles/%016lX.cfg"
 
 const char g_noticeText[] =
     "nx-hbloader " VERSION "\0"

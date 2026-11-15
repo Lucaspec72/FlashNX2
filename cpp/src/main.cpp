@@ -267,7 +267,7 @@ extern "C" uint32_t ruffle_cpu_clock_hz(void);
 extern "C" uint32_t ruffle_gpu_clock_hz(void);
 extern "C" void flashnx_clocks_restore(void);
 
-// True when `sdmc:/switch/FlashNX/dumpvars.on` exists: the pause button then
+// True when `sdmc:/switch/FlashNX2/dumpvars.on` exists: the pause button then
 // also prints the movie's AVM1 variables (see the `-` handler). Same shape as
 // the `trace.on` marker in ruffle_bridge.cpp, and for the same reason — a
 // diagnostic nobody should pay for unless they asked for it. Checked once.
@@ -277,7 +277,7 @@ static bool dump_vars_on_pause(void) {
     if (!checked) {
         checked = true;
         struct stat st;
-        on = (::stat("sdmc:/switch/FlashNX/dumpvars.on", &st) == 0);
+        on = (::stat("sdmc:/switch/FlashNX2/dumpvars.on", &st) == 0);
     }
     return on;
 }
@@ -937,7 +937,7 @@ static const char* app_file_path(const char* name) {
     static char out[600];
     char root[512];
     root[0] = '\0';
-    FILE* gd = std::fopen("sdmc:/switch/FlashNX/games_dir", "rb");
+    FILE* gd = std::fopen("sdmc:/switch/FlashNX2/games_dir", "rb");
     if (!gd) gd = std::fopen("sdmc:/flashnx/games_dir", "rb");
     if (gd) {
         const size_t n = std::fread(root, 1, sizeof(root) - 1, gd);
@@ -1285,7 +1285,7 @@ extern "C" int ruffle_cursor_speed_mult_x10(void) {
 // show up for `.swf`. We only write it when Sphaira is installed (its config dir
 // exists) so we never litter other setups, and only when the file is absent so a
 // user edit is never clobbered. `self_nro` is argv[0] (e.g.
-// "sdmc:/switch/FlashNX/FlashNX.nro"); Sphaira wants the path without the
+// "sdmc:/switch/FlashNX2/FlashNX2.nro"); Sphaira wants the path without the
 // "sdmc:" mount prefix. Format mirrors Sphaira's own bundled assoc .ini files
 // (plain key=value, no section header).
 static void register_sphaira_assoc(const char* self_nro) {
@@ -1294,11 +1294,11 @@ static void register_sphaira_assoc(const char* self_nro) {
         return; // Sphaira not installed — nothing to register with.
     }
     mkdir("sdmc:/config/sphaira/assoc", 0777); // no-op if it already exists
-    const char* ini = "sdmc:/config/sphaira/assoc/FlashNX.ini";
+    const char* ini = "sdmc:/config/sphaira/assoc/FlashNX2.ini";
     if (stat(ini, &st) == 0) {
         return; // already registered — leave any user edits alone.
     }
-    const char* nro = "/switch/FlashNX/FlashNX.nro"; // sane default
+    const char* nro = "/switch/FlashNX2/FlashNX2.nro"; // sane default
     if (self_nro && self_nro[0]) {
         nro = (std::strncmp(self_nro, "sdmc:", 5) == 0) ? self_nro + 5 : self_nro;
     }
@@ -1315,7 +1315,7 @@ static void register_sphaira_assoc(const char* self_nro) {
 
 // Where the HOME-menu tiles find FlashNX when it is not at its usual place.
 //
-// A tile's forwarder loads `sdmc:/switch/FlashNX/FlashNX.nro`, the path the
+// A tile's forwarder loads `sdmc:/switch/FlashNX2/FlashNX2.nro`, the path the
 // README and the Homebrew App Store use. A `.nro` taken from the releases is
 // often dropped straight into `/switch/` instead, where FlashNX runs fine and
 // every tile it installs fails to start (2346-0003). So FlashNX notes the path it
@@ -1328,8 +1328,8 @@ static void register_sphaira_assoc(const char* self_nro) {
 // Sphaira association: tiles would then start that one game whatever they were
 // made for.
 static void remember_own_path(const char* self_nro) {
-    static const char* const usual = "sdmc:/switch/FlashNX/FlashNX.nro";
-    static const char* const note = "sdmc:/switch/FlashNX/tiles/nro.path";
+    static const char* const usual = "sdmc:/switch/FlashNX2/FlashNX2.nro";
+    static const char* const note = "sdmc:/switch/FlashNX2/tiles/nro.path";
     if (!self_nro || !self_nro[0]) return;
     char path[512];
     if (self_nro[0] == '/') {
@@ -1352,8 +1352,8 @@ static void remember_own_path(const char* self_nro) {
         old[got] = '\0';
         if (std::strcmp(old, path) == 0) return;
     }
-    ::mkdir("sdmc:/switch/FlashNX", 0777);
-    ::mkdir("sdmc:/switch/FlashNX/tiles", 0777);
+    ::mkdir("sdmc:/switch/FlashNX2", 0777);
+    ::mkdir("sdmc:/switch/FlashNX2/tiles", 0777);
     FILE* f = std::fopen(note, "wb");
     if (!f) {
         std::printf("tiles: could not write %s\n", note);
@@ -1822,7 +1822,7 @@ static void worker_entry(void* arg) {
     // On a TV that is 1920x1080 (#144); the marker is read once per game.
     {
         struct stat st;
-        g_tv1080_off = ::stat("sdmc:/switch/FlashNX/tv1080.off", &st) == 0;
+        g_tv1080_off = ::stat("sdmc:/switch/FlashNX2/tv1080.off", &st) == 0;
     }
     game_surface_apply();
 
@@ -3317,7 +3317,7 @@ static void worker_entry(void* arg) {
 
 int main(int argc, char** argv) {
     // Forwarder support: a HOME-menu shortcut (an NSP forwarder made on-device
-    // with switch-nsp-forwarder / Sphaira) launches FlashNX.nro with a target
+    // with switch-nsp-forwarder / Sphaira) launches FlashNX2.nro with a target
     // `.swf` as an argument — exactly like a RetroArch forwarder passes a ROM
     // path. If we were handed one, boot straight into that game and skip the
     // library. Scan all args (argv[0] is our own NRO path under hbloader) for
@@ -3355,13 +3355,13 @@ int main(int argc, char** argv) {
     // the first Rust allocation reserves the region.
     {
         struct stat st;
-        if (::stat("sdmc:/switch/FlashNX/noalloc.on", &st) == 0) {
+        if (::stat("sdmc:/switch/FlashNX2/noalloc.on", &st) == 0) {
             ruffle_alloc_force_off();
             g_noalloc_marker = true;   // announced below, once nxlink is up
             std::fflush(stdout);
         }
         // Same for the medium-block allocator (dlmalloc, 2026-10-01).
-        if (::stat("sdmc:/switch/FlashNX/dlmalloc.off", &st) == 0) {
+        if (::stat("sdmc:/switch/FlashNX2/dlmalloc.off", &st) == 0) {
             g_dlmalloc_marker = ruffle_dlmalloc_force_off() ? 1 : -1;
         }
     }

@@ -3,7 +3,7 @@
 
     python scripts/prof_report.py prof.bin cpp/FlashNX.elf [options]
 
-prof.bin comes from `sdmc:/switch/FlashNX/prof.bin` (cpp/src/prof.cpp). The ELF
+prof.bin comes from `sdmc:/switch/FlashNX2/prof.bin` (cpp/src/prof.cpp). The ELF
 must be the one of the build that ran: addresses are looked up in it. Every
 sample is one pause of the Ruffle worker: its PC, its LR, then the return
 addresses of its frame-pointer chain.

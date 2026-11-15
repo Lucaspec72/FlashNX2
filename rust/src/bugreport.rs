@@ -137,13 +137,21 @@ fn log_tail() -> std::string::String {
 /// `tools/bug-report-worker/` and paste its URL here** (e.g.
 /// `https://flashnx-bug-report.<your-subdomain>.workers.dev/report`). Left as a
 /// placeholder on purpose — the secret GitHub token lives in the Worker, never
-/// in this binary.
-pub const BUG_REPORT_ENDPOINT: &str =
-    "https://flashnx.j-levy228.workers.dev/report";
-
 /// App version reported alongside each bug (the library/release line). Bump
 /// with each release so issues are attributable to a build.
-pub const APP_VERSION: &str = "2.1.0";
+/// FlashNX2: its own version line, independent of upstream's. The in-app
+/// update check (rust/src/updater.rs) compares release tags against this, so
+/// FlashNX2 releases must be tagged v2.2.0, v2.2.1, ... (never a 2.1.0-x
+/// suffix, which parses as 2.1.0 and would never read as newer).
+pub const APP_VERSION: &str = "2.2.0";
+
+/// FlashNX2: the relay worker (`tools/bug-report-worker/`) is upstream's
+/// deployment — the fork has none, and reports must not land as issues on the
+/// original repo. The "example" placeholder makes `endpoint_configured()`
+/// false, so sending fails with the built-in friendly "not configured"
+/// message. Deploy your own worker and point this at it to enable reports.
+pub const BUG_REPORT_ENDPOINT: &str =
+    "https://flashnx2-bug-report.example.workers.dev/report";
 
 /// Everything we send about a reported game. The relay formats the GitHub
 /// issue title/body from these fields, so the client stays format-agnostic.

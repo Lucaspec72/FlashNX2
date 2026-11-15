@@ -51,7 +51,7 @@ pub(crate) fn drive() {
 pub(crate) fn about_row_a(s: &mut State) {
     // Debug marker: A starts FlashNX again at once, with no update, so the
     // restart can be tried on its own.
-    if crate::sources::gamezip::read_file_bounded("sdmc:/switch/FlashNX/restart_test.on", 4).is_some() {
+    if crate::sources::gamezip::read_file_bounded("sdmc:/switch/FlashNX2/restart_test.on", 4).is_some() {
         log("update: restart_test.on present -> starting FlashNX again\n");
         if crate::updater::request_restart() {
             s.screen = Screen::Quit;

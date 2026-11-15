@@ -27,7 +27,7 @@ extern "C" int net_init(void);
 
 namespace {
 
-constexpr const char* CACERT_PATH = "sdmc:/switch/FlashNX/cacert.pem";
+constexpr const char* CACERT_PATH = "sdmc:/switch/FlashNX2/cacert.pem";
 // A release's JSON is a few kilobytes; past this it is not what was asked for.
 constexpr size_t CHECK_MAX = 256u * 1024;
 

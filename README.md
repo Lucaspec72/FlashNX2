@@ -1,3 +1,76 @@
+# FlashNX2
+
+<p align="center">
+  <strong>FlashNX2 — an unofficial Nintendo Switch 2 port of FlashNX.</strong><br>
+  A fork of <a href="https://github.com/Jonathan8520/FlashNX">FlashNX</a> by Jonathan8520
+  that targets the Switch 2 (libounce / OunceVK toolchain) so the same Flash games run on the newer console.<br>
+  Powered by <a href="https://github.com/ruffle-rs/ruffle">Ruffle</a>, as upstream.
+</p>
+
+> **⚠️ Disclaimer — AI-generated port**
+> This fork was created **entirely by AI** (OpenCode running GLM-5.3): the porting
+> work, build tooling and documentation below the divider are all machine-generated.
+> It is **unofficial** — not affiliated with, endorsed by, or (yet) reviewed by the
+> original author. It has **not been fully validated on real hardware** yet (it
+> builds; on-console testing is in progress — see [`PORT_NOTES.md`](PORT_NOTES.md)).
+> Use at your own risk. For the supported Switch 1 experience, use the
+> [original FlashNX](https://github.com/Jonathan8520/FlashNX).
+
+## What's modified vs upstream
+
+The port is deliberately **mechanical**: the engine, UI and gameplay code are
+untouched upstream FlashNX; only what the Switch 2 toolchain requires changes.
+One commit on top of upstream `97085c6` contains everything:
+
+| Area | Files | What changed |
+|:--|:--|:--|
+| C++ build | `cpp/Makefile`, `forwarder/Makefile` | `switch2_rules` instead of `switch_rules`; `ARCH := $(SWITCH2_CPU)` (cortex-a78c); libounce `switch.specs`; app identity → FlashNX2 / 2.1.0-ns2.0 (identity strings must be paren- and space-free — expanded into unquoted `-D` defines) |
+| C++ sources | `cpp/src/flashnx_heap.c` | bail out of newlib heap init when `fake_heap_*` don't describe a usable heap (libounce's mimalloc owns it) |
+| C++ sources | `cpp/src/nsp.cpp` | libounce API divergence: `NacpStruct.lang[16]` → `NacpStruct.lang_data.lang[16]` (tracks HOS 21.x, where libnx froze) |
+| Identity / updates | `rust/src/updater.rs`, `rust/src/bugreport.rs`, `rust/src/translate.rs`, `rust/src/library.rs`, `rust/src/lib.rs`, `rust/src/backend/render.rs`, `rust/src/library/settings_tab.rs`, `cpp/src/*`, `forwarder/source/main.c`, `scripts/make_standalone.py` | update checks target **`Lucaspec72/FlashNX2`** (never the original's releases); the app's own SD dir is `sdmc:/switch/FlashNX2/` so an installed original FlashNX shares nothing (update markers, HOME-menu tiles, kill switches, cacert copy, trash); game data dirs (`sdmc:/flashnx`, `sdmc:/ruffle`) are untouched — libraries/saves/profiles stay compatible with upstream, and the shared control-profile API still reads the original repo's community data on purpose; bug-report and translate relays point at the built-in `"example"` placeholder (no FlashNX2 worker exists; both fail gracefully instead of using the original's worker — deploy your own and fill the URLs to enable); version line bumped to **2.2.0** (releases must be tagged `v2.2.0`, `v2.2.1`, … — the update check parses numeric triples only); About screen + footer credit Jonathan8520 (MIT attribution, kept) and name the fork |
+| Rust config | `rust/.cargo/config.toml`, `rust/rust-toolchain.toml` | target CPU `cortex-a78c`; host-agnostic `nightly` channel; Switch 2 linker flags |
+| Rust lockfile | `rust/Cargo.lock` (force-added) | pins `libc 0.2.189` — libc 0.2.190+ (Oct 2026) dropped horizon coverage from `unix/newlib/mod.rs` and fails to compile for this target |
+| Ruffle submodule | `third_party/ruffle` + `patches/ruffle-local-nobin.diff` | submodule pinned at the patched state; `patches/ruffle-local.diff` (upstream's local patches) regenerated without 8 payload-less binary test fixtures so it applies cleanly in the build container |
+| Build tooling | `flashnx2.ps1`, `docker/` (Dockerfile, `rust-src-patches.py`), `scripts/build-ns2.sh`, `scripts/fix-libc-cache.py`, `scripts/patch-rust-src.sh` | Linux/Docker build path replacing upstream's Windows (MSYS2 + scoop) one; `ns2-rust-builder` image = devkita64 + headless JRE (for ruffle's `asc.jar`) + Rust nightly with two std patches (horizon `build.rs` restriction, deterministic `RandomState` seed); `fix-libc-cache.py` patches the extracted libc 0.2.190+ in the cargo registry cache because `cargo -Z build-std` resolves std's deps freshly and ignores both lock files |
+| Docs | `PORT_NOTES.md` | full port record: every change, gotcha and open risk |
+
+**Not included in the repo**: the Switch 2 devkit drop (`ounce-devkit-*`, with
+libounce, the `switch2` portlibs and `switch2vars.sh`) — mount/read-only, never
+modified. And `.cargo-home/` (git-ignored cargo cache).
+
+> **Publishing note**: the `third_party/ruffle` submodule pin points at a local
+> patched commit. Before publishing this repo, push that state to a Ruffle fork
+> (e.g. `<you>/ruffle` branch `flashnx2`) and update `.gitmodules` so others can
+> fetch it.
+
+## Build (Switch 2)
+
+Requirements: **Docker Desktop** running, plus the Switch 2 devkit drop
+(`ounce-devkit-<date>` — found in this folder or any parent; or set
+`$env:SWITCH2_DEVKIT` to its path).
+
+```powershell
+.\flashnx2.ps1 image        # (re)build the ns2-rust-builder image (one-time, auto on first build)
+.\flashnx2.ps1 build        # build cpp/FlashNX2.nro (~32 MB)
+.\flashnx2.ps1 build -Dev   # release-dev profile, thin LTO, faster iteration
+.\flashnx2.ps1 clean
+.\flashnx2.ps1 shell        # interactive bash in the container
+```
+
+Output: **`cpp/FlashNX2.nro`** — copy to `sdmc:/switch/` and launch from the
+homebrew menu (Switch 2 with homebrew/HEN loader). The forwarder NSP it embeds
+(`forwarder/forwarder.nsp`) is for a future HOME Menu tile and is not yet
+validated.
+
+Status: **builds clean end-to-end** (Rust staticlib → forwarder → C++ link
+against libounce → nro). On-console testing is the remaining milestone — open
+risks (audio `audren` vs `audu`, GL 4.3 via Zink, EGL stencil, heap
+accounting) are tracked in [`PORT_NOTES.md`](PORT_NOTES.md).
+
+---
+
+# Original FlashNX readme
+
 <p align="center">
   <img src="assets/banner.png" alt="FlashNX" width="480">
 </p>

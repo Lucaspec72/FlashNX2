@@ -9,7 +9,7 @@
 //! How: one allocation is sampled every ~INTERVAL bytes allocated (a shared
 //! countdown), its call stack taken from the frame-pointer chain and kept in a
 //! fixed table until that block is freed. Every `dump` groups the live samples
-//! by stack and writes them to `sdmc:/switch/FlashNX/heapprof.bin`;
+//! by stack and writes them to `sdmc:/switch/FlashNX2/heapprof.bin`;
 //! `scripts/heapprof_report.py` turns that and the build's FlashNX.elf into a
 //! ranking. A sample stands for max(its size, INTERVAL) bytes.
 //!

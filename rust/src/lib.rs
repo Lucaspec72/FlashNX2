@@ -431,7 +431,7 @@ mod counting_alloc {
     static BUMP_END: AtomicUsize = AtomicUsize::new(0);
     /// Bytes handed out of the region and not returned, reported as `slabMB`.
     pub static SLAB_BYTES: AtomicU64 = AtomicU64::new(0);
-    /// Kill switch, set from C++ at boot when `sdmc:/switch/FlashNX/noalloc.on`
+    /// Kill switch, set from C++ at boot when `sdmc:/switch/FlashNX2/noalloc.on`
     /// exists — before the worker thread starts, so before any Rust allocation.
     /// With it on, the region is never reserved and every block goes to newlib:
     /// byte for byte the behaviour that predates this module, for A/B testing a
@@ -1991,7 +1991,7 @@ pub extern "C" fn ruffle_init() -> c_int {
     // never call ExternalInterface).
     builder = builder.with_external_interface(std::boxed::Box::new(ContainerInterface));
 
-    // `sdmc:/switch/FlashNX/mcref.off` turns off the AVM1 clip-reference cache
+    // `sdmc:/switch/FlashNX2/mcref.off` turns off the AVM1 clip-reference cache
     // (FLASHNX_MCREF_CACHE in our Ruffle's avm1/object_reference.rs), to check
     // whether an AS2 game misbehaves because of it, on the same binary. An
     // experiment, never a default. Read at every launch, so removing the file
@@ -2006,10 +2006,10 @@ pub extern "C" fn ruffle_init() -> c_int {
     if !mcref_cache {
         log(b"mcref: mcref.off present -> AVM1 clip-reference cache DISABLED\n\0");
     }
-    // `sdmc:/switch/FlashNX/gotoskip.off`: inner gotos walk every orphan again,
+    // `sdmc:/switch/FlashNX2/gotoskip.off`: inner gotos walk every orphan again,
     // as upstream does (see `run_inner_goto_frame` in our Ruffle). Same kind of
     // experiment switch as mcref.off.
-    // `sdmc:/switch/FlashNX/moviefree.off`: SWFs unloaded by a Loader are kept
+    // `sdmc:/switch/FlashNX2/moviefree.off`: SWFs unloaded by a Loader are kept
     // for good again, as upstream does (see `Library::release_movie` in our
     // Ruffle). Same kind of experiment switch as mcref.off.
     let movie_free = !backend::render::marker_present("moviefree.off");
@@ -2022,7 +2022,7 @@ pub extern "C" fn ruffle_init() -> c_int {
     if !goto_skip {
         log(b"gotos: gotoskip.off present -> inner gotos walk every orphan\n\0");
     }
-    // `sdmc:/switch/FlashNX/frameorphans.off`: full frames walk the whole
+    // `sdmc:/switch/FlashNX2/frameorphans.off`: full frames walk the whole
     // orphan list to construct and script the dirty ones, instead of taking
     // them from the queue the inner gotos use (`set_frame_orphan_queue`).
     let frame_orphans = !backend::render::marker_present("frameorphans.off");
@@ -2030,31 +2030,31 @@ pub extern "C" fn ruffle_init() -> c_int {
     if !frame_orphans {
         log(b"gotos: frameorphans.off present -> full frames walk every orphan\n\0");
     }
-    // `sdmc:/switch/FlashNX/ftebase.off`: an FTE TextLine draws its text from
+    // `sdmc:/switch/FlashNX2/ftebase.off`: an FTE TextLine draws its text from
     // its top, one line too low, as upstream (#142).
     let fte_base = !backend::render::marker_present("ftebase.off");
     ruffle_core::set_fte_baseline(fte_base);
     if !fte_base {
         log(b"text: ftebase.off present -> FTE lines drawn from their top\n\0");
     }
-    // `sdmc:/switch/FlashNX/spritecull.off`: a sprite's drawing is drawn even
+    // `sdmc:/switch/FlashNX2/spritecull.off`: a sprite's drawing is drawn even
     // when it cannot reach the screen, as upstream (#139).
     let sprite_cull = !backend::render::marker_present("spritecull.off");
     ruffle_core::set_sprite_cull(sprite_cull);
     if !sprite_cull {
         log(b"cull: spritecull.off present -> off-screen sprite drawings are drawn\n\0");
     }
-    // `sdmc:/switch/FlashNX/leafcull.off`: a sprite with only an off-screen
+    // `sdmc:/switch/FlashNX2/leafcull.off`: a sprite with only an off-screen
     // drawing still pushes its transform and walks its children (#139).
     let leaf_cull = !backend::render::marker_present("leafcull.off");
     ruffle_core::set_leaf_cull(leaf_cull);
     if !leaf_cull {
         log(b"cull: leafcull.off present -> off-screen sprites walked\n\0");
     }
-    // `sdmc:/switch/FlashNX/avm1goto.off`: an AS2 gotoAndStop/nextFrame runs
+    // `sdmc:/switch/FlashNX2/avm1goto.off`: an AS2 gotoAndStop/nextFrame runs
     // the AS3 inner frame again, as upstream does (see
     // `explicit_goto_runs_inner_frame` in our Ruffle). Same kind of switch.
-    // `sdmc:/switch/FlashNX/avm1names.on` (measuring builds): the `avm1ops:`
+    // `sdmc:/switch/FlashNX2/avm1names.on` (measuring builds): the `avm1ops:`
     // report also lists CallMethod by method name and GetMember by property
     // name. Off by default, it slows every GetMember down.
     let avm1_names = backend::render::marker_present("avm1names.on");
@@ -2067,7 +2067,7 @@ pub extern "C" fn ruffle_init() -> c_int {
     if !avm1_goto {
         log(b"gotos: avm1goto.off present -> AVM1 gotos run the inner frame\n\0");
     }
-    // `sdmc:/switch/FlashNX/unloadedframe.off`: a clip emptied by unloadMovie()
+    // `sdmc:/switch/FlashNX2/unloadedframe.off`: a clip emptied by unloadMovie()
     // gets its enterFrame events again, as upstream does (see
     // `unloaded_clip_gets_enter_frame` in our Ruffle). Same kind of switch.
     let unloaded_quiet = !backend::render::marker_present("unloadedframe.off");
@@ -2075,7 +2075,7 @@ pub extern "C" fn ruffle_init() -> c_int {
     if !unloaded_quiet {
         log(b"gotos: unloadedframe.off present -> unloaded clips keep their enterFrame\n\0");
     }
-    // `sdmc:/switch/FlashNX/offbounds.off`: BitmapData.draw copies the whole
+    // `sdmc:/switch/FlashNX2/offbounds.off`: BitmapData.draw copies the whole
     // bitmap in and out of its temp again (see `render_offscreen` in
     // render.rs). Same kind of experiment switch.
     let off_bounds = !backend::render::marker_present("offbounds.off");
@@ -2083,7 +2083,7 @@ pub extern "C" fn ruffle_init() -> c_int {
     if !off_bounds {
         log(b"offscreen: offbounds.off present -> draws copy the whole bitmap\n\0");
     }
-    // `sdmc:/switch/FlashNX/unsyncvbo.off`: shapes written into the arenas
+    // `sdmc:/switch/FlashNX2/unsyncvbo.off`: shapes written into the arenas
     // with glBufferSubData again, waiting for the GPU (see
     // `BufferArena::upload` in render.rs). Same kind of experiment switch.
     let unsync_vbo = !backend::render::marker_present("unsyncvbo.off");
@@ -2091,7 +2091,7 @@ pub extern "C" fn ruffle_init() -> c_int {
     if !unsync_vbo {
         log(b"arena: unsyncvbo.off present -> shape uploads wait for the GPU\n\0");
     }
-    // `sdmc:/switch/FlashNX/rendercost.off`: catch-up decided from the frames'
+    // `sdmc:/switch/FlashNX2/rendercost.off`: catch-up decided from the frames'
     // own cost again, without the `render` handlers they ask for, as upstream
     // does (see `Player::render` in our Ruffle). Same kind of experiment switch.
     let render_cost = !backend::render::marker_present("rendercost.off");
@@ -2099,35 +2099,35 @@ pub extern "C" fn ruffle_init() -> c_int {
     if !render_cost {
         log(b"frames: rendercost.off present -> render handlers left out of catch-up\n\0");
     }
-    // `sdmc:/switch/FlashNX/asyncsave.off`: saves written in the frame that
+    // `sdmc:/switch/FlashNX2/asyncsave.off`: saves written in the frame that
     // makes them, as before `save_writer.cpp`.
     let async_saves = !backend::render::marker_present("asyncsave.off");
     crate::backend::storage::set_async_saves(async_saves);
     if !async_saves {
         log(b"storage: asyncsave.off present -> saves written on the game thread\n\0");
     }
-    // `sdmc:/switch/FlashNX/trackmirror.off`: no Playtomic in the tracker list,
+    // `sdmc:/switch/FlashNX2/trackmirror.off`: no Playtomic in the tracker list,
     // and no memory of mirror misses (`backend::navigator`).
     let track_mirror = !backend::render::marker_present("trackmirror.off");
     crate::backend::navigator::set_mirror_guards(track_mirror);
     if !track_mirror {
         log(b"navigator: trackmirror.off present -> Playtomic and repeat misses go to the mirror\n\0");
     }
-    // `sdmc:/switch/FlashNX/maskfix.off`: masks as upstream Ruffle draws and
+    // `sdmc:/switch/FlashNX2/maskfix.off`: masks as upstream Ruffle draws and
     // picks them (filters kept in a mask, no clicks inside a clip layer).
     let mask_fixes = !backend::render::marker_present("maskfix.off");
     ruffle_core::set_flashnx_mask_fixes(mask_fixes);
     if !mask_fixes {
         log(b"masks: maskfix.off present -> upstream mask drawing and picking\n\0");
     }
-    // `sdmc:/switch/FlashNX/gcsmall.off`: the collector sleeps 0.5x the live
+    // `sdmc:/switch/FlashNX2/gcsmall.off`: the collector sleeps 0.5x the live
     // heap whatever its size, as upstream (`set_gc_small_pacing` in our Ruffle).
     let gc_small = !backend::render::marker_present("gcsmall.off");
     ruffle_core::set_gc_small_pacing(gc_small);
     if !gc_small {
         log(b"gc: gcsmall.off present -> default pacing on small heaps\n\0");
     }
-    // `sdmc:/switch/FlashNX/gcassist.off`: dead bitmaps get no collector time
+    // `sdmc:/switch/FlashNX2/gcassist.off`: dead bitmaps get no collector time
     // between frames, only the full collection once they grew by 32 MB
     // (`bitmapdata_assist_budget_us` in our Ruffle).
     let gc_assist = !backend::render::marker_present("gcassist.off");
@@ -2135,10 +2135,10 @@ pub extern "C" fn ruffle_init() -> c_int {
     if !gc_assist {
         log(b"gc: gcassist.off present -> full collections only for dead bitmaps\n\0");
     }
-    // `sdmc:/switch/FlashNX/gmenative.off`: a game's CrossBridge libgme runs as
+    // `sdmc:/switch/FlashNX2/gmenative.off`: a game's CrossBridge libgme runs as
     // it ships, compiled to ActionScript (see gme.rs and `flashnx_gme` in our
     // Ruffle).
-    // `sdmc:/switch/FlashNX/busyspinner.off`: a frame computing for seconds
+    // `sdmc:/switch/FlashNX2/busyspinner.off`: a frame computing for seconds
     // shows nothing turning (see `busy_frame`).
     let busy_spinner = !backend::render::marker_present("busyspinner.off");
     BUSY_SPINNER.store(busy_spinner, core::sync::atomic::Ordering::Relaxed);
@@ -2150,7 +2150,7 @@ pub extern "C" fn ruffle_init() -> c_int {
     if !gme_native {
         log(b"gme: gmenative.off present -> CrossBridge libgme runs as ActionScript\n\0");
     }
-    // `sdmc:/switch/FlashNX/fastcall.off`: upstream's AVM2 call path (an Arc
+    // `sdmc:/switch/FlashNX2/fastcall.off`: upstream's AVM2 call path (an Arc
     // clone per call, the receiver check, the whole new frame cleared), see
     // `set_fast_calls` in our Ruffle.
     let fast_calls = !backend::render::marker_present("fastcall.off");
@@ -2158,13 +2158,13 @@ pub extern "C" fn ruffle_init() -> c_int {
     if !fast_calls {
         log(b"calls: fastcall.off present -> upstream AVM2 call path\n\0");
     }
-    // `sdmc:/switch/FlashNX/avm1push.off`: AVM1 pushes decoded into a Vec.
+    // `sdmc:/switch/FlashNX2/avm1push.off`: AVM1 pushes decoded into a Vec.
     let fast_push = !backend::render::marker_present("avm1push.off");
     ruffle_core::set_avm1_fast_push(fast_push);
     if !fast_push {
         log(b"avm1: avm1push.off present -> pushes decoded into a Vec\n\0");
     }
-    // `sdmc:/switch/FlashNX/jit.off`: AVM2 bytecode stays interpreted.
+    // `sdmc:/switch/FlashNX2/jit.off`: AVM2 bytecode stays interpreted.
     let jit = !backend::render::marker_present("jit.off");
     ruffle_core::set_jit(jit);
     // The previous game's player is gone: so is all the code compiled for it.
@@ -2172,14 +2172,14 @@ pub extern "C" fn ruffle_init() -> c_int {
     if !jit {
         log(b"jit: jit.off present -> AVM2 bytecode interpreted\n\0");
     }
-    // `sdmc:/switch/FlashNX/jittos.off`: compiled code writes every op's
+    // `sdmc:/switch/FlashNX2/jittos.off`: compiled code writes every op's
     // result to the frame, as before the stack cache (`set_jit_tos_cache`).
     let jit_tos = !backend::render::marker_present("jittos.off");
     ruffle_core::set_jit_tos_cache(jit_tos);
     if !jit_tos {
         log(b"jit: jittos.off present -> no stack cache in compiled code\n\0");
     }
-    // `sdmc:/switch/FlashNX/jitcb.off`: compiled code without its paths for
+    // `sdmc:/switch/FlashNX2/jitcb.off`: compiled code without its paths for
     // CrossBridge code (inline domain memory and int ops, scopes of `this`,
     // direct calls to bound methods), see `set_jit_crossbridge`.
     let jit_cb = !backend::render::marker_present("jitcb.off");
@@ -2187,28 +2187,28 @@ pub extern "C" fn ruffle_init() -> c_int {
     if !jit_cb {
         log(b"jit: jitcb.off present -> no CrossBridge paths in compiled code\n\0");
     }
-    // `sdmc:/switch/FlashNX/jitint.off`: compiled code keeps every int in its
+    // `sdmc:/switch/FlashNX2/jitint.off`: compiled code keeps every int in its
     // `Value`, tag checked at each op, as before typed ints (`set_jit_ints`).
     let jit_ints = !backend::render::marker_present("jitint.off");
     ruffle_core::set_jit_ints(jit_ints);
     if !jit_ints {
         log(b"jit: jitint.off present -> no typed ints in compiled code\n\0");
     }
-    // `sdmc:/switch/FlashNX/jitcheck.off`: typed code trusts its proofs
+    // `sdmc:/switch/FlashNX2/jitcheck.off`: typed code trusts its proofs
     // without checking the tag of each int it reads (`set_jit_check`).
     let jit_check = !backend::render::marker_present("jitcheck.off");
     ruffle_core::set_jit_check(jit_check);
     if !jit_check {
         log(b"jit: jitcheck.off present -> typed ints not checked\n\0");
     }
-    // `sdmc:/switch/FlashNX/jitinline.off`: every `callmethod` of compiled
+    // `sdmc:/switch/FlashNX2/jitinline.off`: every `callmethod` of compiled
     // code is a call, small callees included (`set_jit_inline`).
     let jit_inline = !backend::render::marker_present("jitinline.off");
     ruffle_core::set_jit_inline(jit_inline);
     if !jit_inline {
         log(b"jit: jitinline.off present -> no callee copied into its caller\n\0");
     }
-    // `sdmc:/switch/FlashNX/frameskip.off`: every frame walks the whole display
+    // `sdmc:/switch/FlashNX2/frameskip.off`: every frame walks the whole display
     // list again in enterFrame, frame construction and frame scripts (see
     // `set_full_frame_skip` in our Ruffle). Same kind of experiment switch.
     let frame_skip = !backend::render::marker_present("frameskip.off");
@@ -2216,7 +2216,7 @@ pub extern "C" fn ruffle_init() -> c_int {
     if !frame_skip {
         log(b"frames: frameskip.off present -> full frames walk the whole display list\n\0");
     }
-    // `sdmc:/switch/FlashNX/stageskip.off`: inner gotos walk the whole stage
+    // `sdmc:/switch/FlashNX2/stageskip.off`: inner gotos walk the whole stage
     // again instead of passing over its unchanged subtrees (the orphan skip
     // above is separate). Same kind of experiment switch.
     let stage_skip = !backend::render::marker_present("stageskip.off");
@@ -2224,7 +2224,7 @@ pub extern "C" fn ruffle_init() -> c_int {
     if !stage_skip {
         log(b"gotos: stageskip.off present -> inner gotos walk the whole stage\n\0");
     }
-    // `sdmc:/switch/FlashNX/lazyshape.off`: static shapes are registered while
+    // `sdmc:/switch/FlashNX2/lazyshape.off`: static shapes are registered while
     // the movie preloads, as upstream does, instead of on first draw. Same kind
     // of experiment switch, to tell whether a missing graphic comes from it.
     let lazy_shapes = !backend::render::marker_present("lazyshape.off");
@@ -2232,7 +2232,7 @@ pub extern "C" fn ruffle_init() -> c_int {
     if !lazy_shapes {
         log(b"shapes: lazyshape.off present -> shapes registered at preload\n\0");
     }
-    // `sdmc:/switch/FlashNX/bitmapcache.off`: cacheAsBitmap ignored, every
+    // `sdmc:/switch/FlashNX2/bitmapcache.off`: cacheAsBitmap ignored, every
     // object drawn directly. To tell whether a misplaced graphic comes from the
     // cached-bitmap path.
     let bitmap_cache = !backend::render::marker_present("bitmapcache.off");
@@ -2240,7 +2240,7 @@ pub extern "C" fn ruffle_init() -> c_int {
     if !bitmap_cache {
         log(b"render: bitmapcache.off present -> cacheAsBitmap ignored\n\0");
     }
-    // `sdmc:/switch/FlashNX/as3prof.on`: time every ActionScript 3 function
+    // `sdmc:/switch/FlashNX2/as3prof.on`: time every ActionScript 3 function
     // the game runs (exclusive/inclusive ms, calls), printed as `as3prof:`
     // lines every 300 frames. A measurement switch, off by default.
     let as3prof = backend::render::marker_present("as3prof.on");
@@ -2259,7 +2259,7 @@ pub extern "C" fn ruffle_init() -> c_int {
     // Super Mario Bros. Crossover's level 2, played with the controller, spent
     // 29 % of its frames picking at (0, 0) (2026-10-24). The first move of the
     // cursor (stick, touch, gyro) or the first click puts it on the stage.
-    // `sdmc:/switch/FlashNX/pointeridle.off`: on the stage from the start.
+    // `sdmc:/switch/FlashNX2/pointeridle.off`: on the stage from the start.
     let pointer_idle = !backend::render::marker_present("pointeridle.off");
     POINTER_IDLE.store(pointer_idle, core::sync::atomic::Ordering::Relaxed);
     POINTER_ON_STAGE.store(false, core::sync::atomic::Ordering::Relaxed);
@@ -5573,7 +5573,7 @@ pub extern "C" fn ruffle_shutdown() {
     if !map.is_empty() {
         let rc = unsafe {
             swf_picker_write_file(
-                c"sdmc:/switch/FlashNX/jitmap.txt".as_ptr(),
+                c"sdmc:/switch/FlashNX2/jitmap.txt".as_ptr(),
                 map.as_ptr(),
                 map.len() as u32,
             )
@@ -5633,7 +5633,7 @@ fn log_str(s: &str) {
 }
 
 /// Turn the small-object cache off for the whole process. Called from C++ at
-/// boot when `sdmc:/switch/FlashNX/noalloc.on` exists, before the worker thread
+/// boot when `sdmc:/switch/FlashNX2/noalloc.on` exists, before the worker thread
 /// starts — so before any Rust allocation, and therefore before the region
 /// would have been reserved. Exists so a game can be measured with and without
 /// the cache without swapping builds.
@@ -5643,7 +5643,7 @@ pub extern "C" fn ruffle_alloc_force_off() {
 }
 
 /// Send medium blocks back to newlib instead of dlmalloc, for an A/B on the
-/// same build: `sdmc:/switch/FlashNX/dlmalloc.off`, read at boot like
+/// same build: `sdmc:/switch/FlashNX2/dlmalloc.off`, read at boot like
 /// `noalloc.on`. Returns false when it came too late (dlmalloc had already
 /// served a block) and was ignored.
 #[no_mangle]

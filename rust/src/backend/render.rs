@@ -7321,11 +7321,11 @@ pub fn thumb_cancel_all() {
 
 // ─── Backend implementation ───────────────────────────────────────────────────
 
-/// True when `sdmc:/switch/FlashNX/<name>` exists. Same convention as the
+/// True when `sdmc:/switch/FlashNX2/<name>` exists. Same convention as the
 /// C++ side's `trace.on` / `dumpvars.on` / `noalloc.on`: an experiment is a
 /// file you drop on the card, never a default and never a menu entry.
 pub(crate) fn marker_present(name: &str) -> bool {
-    std::path::Path::new(&std::format!("sdmc:/switch/FlashNX/{}", name)).exists()
+    std::path::Path::new(&std::format!("sdmc:/switch/FlashNX2/{}", name)).exists()
 }
 
 impl SwitchRenderBackend {
@@ -7335,7 +7335,7 @@ impl SwitchRenderBackend {
     pub fn new(width: u32, height: u32, game_path: Option<&str>) -> Option<Self> {
         let record_path = game_path.map(|p| std::format!("{}.arena", p));
         let record = record_path.as_deref().and_then(read_arena_record);
-        // `sdmc:/switch/FlashNX/arena.small` cuts the reservation by a third,
+        // `sdmc:/switch/FlashNX2/arena.small` cuts the reservation by a third,
         // as an experiment only — never as a default.
         //
         // The 576 MB reserved here is the single largest block of memory
@@ -7656,7 +7656,7 @@ impl SwitchRenderBackend {
         // back to the library): the blocks the last one parked in libdrm's BO
         // cache would only hold heap the next one may need.
         unsafe { flashnx_boc_trim() };
-        // `sdmc:/switch/FlashNX/bocache.off` turns that cache off, to compare a
+        // `sdmc:/switch/FlashNX2/bocache.off` turns that cache off, to compare a
         // game with and without it on the same binary. An experiment, never a
         // default (see `marker_present`).
         if marker_present("bocache.off") {
@@ -13226,7 +13226,9 @@ impl SwitchRenderBackend {
         let vw = self.dimensions.width as f32;
         let vh = self.dimensions.height as f32;
         self.draw_overlay_rect(0.0, vh - 48.0, vw, 1.0, col::LINE);
-        let credit = std::format!("Jonathan8520  \u{00B7}  v{}", crate::bugreport::APP_VERSION);
+        // The original author's credit (MIT attribution, kept as-is) plus the
+        // fork marker, so a rebuilt or rebranded copy is still identifiable.
+        let credit = std::format!("Jonathan8520 \u{00B7} FlashNX2 \u{00B7} v{}", crate::bugreport::APP_VERSION);
         self.kit_text_mid(40.0, vh - 24.0, size::CAPTION + 1.0, &credit, col::TEXT3);
     }
 
@@ -16414,7 +16416,7 @@ impl RenderBackend for SwitchRenderBackend {
                 // Live memory by call stack, every 1200 frames (heapprof build).
                 #[cfg(feature = "heapprof")]
                 if self.frame_count % 1200 == 0 {
-                    crate::heapprof::dump("sdmc:/switch/FlashNX/heapprof.bin");
+                    crate::heapprof::dump("sdmc:/switch/FlashNX2/heapprof.bin");
                     log_str(&std::format!("heapprof: f{} written\n", self.frame_count));
                 }
                 // GPU objects against nvdrv's bookkeeping ceiling (~2 KB per

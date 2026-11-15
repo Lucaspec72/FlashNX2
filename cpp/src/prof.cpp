@@ -1,5 +1,5 @@
 // Sampling profiler for the Ruffle worker thread. A dev tool: it does nothing
-// at all unless `sdmc:/switch/FlashNX/prof.on` exists at boot, except in the
+// at all unless `sdmc:/switch/FlashNX2/prof.on` exists at boot, except in the
 // `--prof` build (FLASHNX_PROF_ALWAYS, see cpp/Makefile), made only for it.
 //
 // Why: the per-action AVM1 counters (the `instr` build) say which bytecode is
@@ -11,7 +11,7 @@
 // How: a thread on another core pauses the worker about once a millisecond
 // (svcSetThreadActivity), reads its registers (svcGetThreadContext3), walks
 // its frame-pointer chain, lets it run again, and appends the addresses to
-// `sdmc:/switch/FlashNX/prof.bin`. `scripts/prof_report.py` turns that file
+// `sdmc:/switch/FlashNX2/prof.bin`. `scripts/prof_report.py` turns that file
 // and the build's FlashNX.elf into flat and inclusive profiles. The kernel
 // only lets a process do this to its own threads, which is all we need.
 //
@@ -42,8 +42,8 @@ namespace {
 constexpr int      kMaxFrames  = 200; // u8 in the record; AVM1 recursion is deep
 constexpr size_t   kBufBytes   = 512 * 1024;
 constexpr uint64_t kIntervalNs = 1000000; // ~1 kHz
-constexpr const char* kMarker  = "sdmc:/switch/FlashNX/prof.on";
-constexpr const char* kOutPath = "sdmc:/switch/FlashNX/prof.bin";
+constexpr const char* kMarker  = "sdmc:/switch/FlashNX2/prof.on";
+constexpr const char* kOutPath = "sdmc:/switch/FlashNX2/prof.bin";
 
 // Record types in prof.bin, after the 32-byte header.
 constexpr uint8_t kRecSample = 1; // u8 type, u8 n, u16 regime, u32 frame, u32 addr[n]

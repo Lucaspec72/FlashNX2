@@ -26,7 +26,12 @@
 
 use crate::net;
 
-const ENDPOINT: &str = "https://flashnx.j-levy228.workers.dev/translate";
+/// FlashNX2: the relay worker (`tools/bug-report-worker/`) is upstream's
+/// deployment — the fork has none, and descriptions must not be translated by
+/// the original's worker. The "example" placeholder makes every request fail
+/// (a toast turns the feature off for the session), which is graceful. Deploy
+/// your own worker and point this at it to enable translations.
+const ENDPOINT: &str = "https://flashnx2-translate.example.workers.dev/translate";
 
 /// Translations kept for the session, the oldest dropped past this. One
 /// details window after another, the same few descriptions come back.

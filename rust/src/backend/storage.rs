@@ -56,7 +56,7 @@ use ruffle_core::backend::storage::StorageBackend;
 // returns; `RECENT` keeps the newest bytes of every save queued this session so
 // `get` sees a write that may not be on the card yet. The worker does the same
 // file operations and the same commit; `drain_saves` waits for it when a game
-// ends. Off with `sdmc:/switch/FlashNX/asyncsave.off`.
+// ends. Off with `sdmc:/switch/FlashNX2/asyncsave.off`.
 
 extern "C" {
     fn flashnx_save_async(path: *const core::ffi::c_char, data: *const u8, len: usize) -> core::ffi::c_int;
